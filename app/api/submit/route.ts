@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/db"
 
 export async function POST(req: Request) {
-  const { userId: clerkId } = auth()
+  const { userId: clerkId } = await auth()
   if (!clerkId) {
     return NextResponse.redirect(new URL(`/login?goto=/submit`, req.url))
   }
