@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic"
 import { SubmitForm } from "@/app/submit/submit-form"
 
 export default function Page() {

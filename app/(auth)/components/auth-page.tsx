@@ -12,9 +12,9 @@ type PageInfo = {
 }
 const pageMap = {
   login: {
-    title: "Log in to HackerNews",
+    title: "Log in to CGNews",
     buttonText: "Login",
-    switcherTips: "New to HackerNews?",
+    switcherTips: "New to CGNews?",
     switcherText: "Create an account",
     switcherHref: "/signup",
   },

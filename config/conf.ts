@@ -65,9 +65,9 @@ export const profileTabs = [
 ]
 
 export const siteConf = {
-  title: "Hacker News",
+  title: "CGNews",
   description:
-    "A Hacker News clone website built with TypeScript, Next.js, and Shadcn/UI.",
+    "CGNews — a community news site built with TypeScript, Next.js, and Shadcn/UI.",
   authors: [
     {
       name: "White",

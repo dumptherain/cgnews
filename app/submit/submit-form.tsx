@@ -16,12 +16,22 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { submitStoryAction } from "@/lib/actions"
 
-const submitFormSchema = z.object({
-  title: z.string().min(1),
-  url: z.string().url(),
-  text: z.string().optional(),
-})
+const submitFormSchema = z
+  .object({
+    title: z.string().min(1, { message: "Title is required" }),
+    url: z
+      .string()
+      .trim()
+      .max(2048, { message: "URL is too long" })
+      .optional(),
+    text: z.string().optional(),
+  })
+  .refine((d) => (d.url?.trim() || d.text?.trim()), {
+    path: ["url"],
+    message: "Provide a URL or some text",
+  })
 
 export function SubmitForm() {
   const form = useForm<z.infer<typeof submitFormSchema>>({
@@ -33,16 +43,9 @@ export function SubmitForm() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof submitFormSchema>) {
-    console.log(values)
-  }
-
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="max-w-[600px] space-y-4"
-      >
+      <form action={submitStoryAction} className="max-w-[600px] space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -50,7 +53,7 @@ export function SubmitForm() {
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} name="title" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -63,7 +66,7 @@ export function SubmitForm() {
             <FormItem>
               <FormLabel>Url</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} name="url" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -76,13 +79,13 @@ export function SubmitForm() {
             <FormItem>
               <FormLabel>Text</FormLabel>
               <FormControl>
-                <Textarea className="h-32" {...field} />
+                <Textarea className="h-32" {...field} name="text" />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled>
+        <Button type="submit">
           Submit
         </Button>
         <FormDescription>

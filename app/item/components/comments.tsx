@@ -1,83 +1,53 @@
-"use client"
+import { HnItem } from "@/lib/hn-types"
+import { listStoryComments } from "@/lib/data"
+import Thread from "@/app/user/components/thread"
+import { deleteCommentAction } from "@/lib/actions"
+import { currentUser } from "@clerk/nextjs/server"
 
-import { Loader2 } from "lucide-react"
-import useSWRInfinite, { SWRInfiniteConfiguration } from "swr/infinite"
-
-import { fetchComments } from "@/lib/hn-api-fetcher"
-import { HnComment, HnItem } from "@/lib/hn-types"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-
-import Comment from "./comment"
-
-const PAGE_SIZE = 10
-const options = {
-  revalidateIfStale: false,
-  revalidateOnFocus: false,
-  revalidateOnReconnect: false,
-  revalidateFirstPage: false,
-} as SWRInfiniteConfiguration
-
-const fetcher = async (showIds: number[]) => {
-  return await fetchComments(showIds)
-}
-
-const getKey = (ids: number[]) => {
-  return (page: number, previousPageData: any) => {
-    if (previousPageData && !previousPageData.length) {
-      return null
-    }
-    const offset = page * PAGE_SIZE
-    const showIds = ids.slice(offset, offset + PAGE_SIZE)
-    return showIds
-  }
-}
-
-export default function Comments({
+export default async function Comments({
   story,
   ids,
 }: {
   story: HnItem
   ids: number[]
 }) {
-  const { data, mutate, size, setSize, isValidating, isLoading } =
-    useSWRInfinite(getKey(ids), fetcher, options)
-
-  const isNoComment = !ids || ids.length == 0
-  const comments = data ? [].concat(...data) : []
-  const isLoadingMore =
-    isLoading || (size > 0 && data && typeof data[size - 1] === "undefined")
-  const isEmpty = data?.[0]?.length === 0
-  const isReachingEnd =
-    isEmpty ||
-    (data && data[data.length - 1]?.length < PAGE_SIZE) ||
-    comments.length === ids.length
-  const text = isNoComment
-    ? "No comment yet"
-    : isLoadingMore
-      ? "Loading..."
-      : isReachingEnd
-        ? "No More"
-        : "More"
-
+  const comments = await listStoryComments(story.id)
+  const cu = await currentUser()
+  const myId = cu?.username || cu?.id
+  if (!comments.length) {
+    return <div>No comment yet</div>
+  }
   return (
     <div>
-      {comments.map((comment: HnComment) => {
-        return <Comment key={comment?.id} comment={comment} story={story} />
+      {comments.map((c: any) => {
+        const canDelete = myId && (myId === c.by) && (Date.now()/1000 - c.time <= 2*60*60)
+        return (
+          <div key={c.id} className="mb-1">
+            <div className="flex items-center justify-between">
+              <Thread
+                comment={{
+                  id: c.id,
+                  indent: 0,
+                  age: "",
+                  time: c.time,
+                  userId: c.by,
+                  onStory: String(story.id),
+                  storyLink: "",
+                  commentHtml: c.text,
+                  kids: [],
+                }}
+              />
+              {canDelete && (
+                <form action={deleteCommentAction} className="ml-2">
+                  <input type="hidden" name="commentId" value={c.id} />
+                  <input type="hidden" name="storyId" value={story.id} />
+                  <button type="submit" className="text-xs underline text-muted-foreground">delete</button>
+                </form>
+              )}
+            </div>
+          </div>
+        )
       })}
-
-      <Button
-        variant={"link"}
-        disabled={isNoComment || isLoadingMore || isReachingEnd}
-        className={cn(
-          "pl-0",
-          !isNoComment && !isLoadingMore && !isReachingEnd && "underline"
-        )}
-        onClick={() => setSize(size + 1)}
-      >
-        {isLoadingMore && <Loader2 className="mr-1 animate-spin" size={14} />}
-        {text}
-      </Button>
     </div>
   )
 }

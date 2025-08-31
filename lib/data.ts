@@ -83,3 +83,27 @@ export async function listStories({
 }
 
 
+export async function getStory(id: number): Promise<HnItem | null> {
+	const story = await prisma.story.findUnique({
+		where: { id },
+		include: { author: { select: { username: true } }, _count: { select: { comments: true } } },
+	})
+	if (!story) return null
+	return toHnItem(story)
+}
+
+export async function listStoryComments(storyId: number) {
+	const comments = await prisma.comment.findMany({
+		where: { storyId },
+		orderBy: { createdAt: "asc" },
+		include: { author: { select: { username: true } } },
+	})
+	return comments.map((c) => ({
+		id: c.id,
+		by: c.author.username,
+		text: c.text,
+		time: Math.floor(new Date(c.createdAt).getTime() / 1000),
+	}))
+}
+
+

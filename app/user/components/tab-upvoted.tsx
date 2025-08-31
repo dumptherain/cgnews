@@ -1,7 +1,9 @@
 import { Suspense } from "react"
 import Link from "next/link"
 
-import { getUpvotedComments, getUpvotedSubmissions } from "@/lib/hn-web-fetcher"
+import { prisma } from "@/lib/db"
+import { HnWebStory } from "@/lib/hn-web-types"
+import { points, site, ago } from "@/lib/hn-item-utils"
 import Loading from "@/components/loading"
 import Story from "@/components/story"
 
@@ -34,7 +36,9 @@ export default function TabUpvoted({
 }
 
 async function UpvotedComments({ userId }: { userId: string }) {
-  const { comments, moreLink } = await getUpvotedComments(userId)
+  // Not implemented yet in Prisma backend
+  const comments: any[] = []
+  const moreLink = ""
   return (
     <div className="pt-2">
       {comments.map((comment, i) => (
@@ -58,7 +62,40 @@ async function UpvotedComments({ userId }: { userId: string }) {
 }
 
 async function UpvotedSubmissions({ userId }: { userId: string }) {
-  const { storyList, moreLink } = await getUpvotedSubmissions(userId)
+  // Resolve local user by username or Clerk id
+  const user = await prisma.user.findFirst({
+    where: { OR: [{ username: userId }, { clerkId: userId }] },
+  })
+  const votes = user
+    ? await prisma.vote.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: "desc" },
+        include: {
+          story: {
+            include: { author: { select: { username: true } } },
+          },
+        },
+        take: 50,
+      })
+    : []
+
+  const storyList: HnWebStory[] = votes.map((v) => {
+    const s = v.story
+    return {
+      id: s.id,
+      title: s.title,
+      url: s.url || "",
+      sitestr: site(s.url || undefined) || "",
+      score: points(s.score) || "0 points",
+      by: s.author.username,
+      age: ago(Math.floor(new Date(s.createdAt).getTime() / 1000)) || "",
+      time: Math.floor(new Date(s.createdAt).getTime() / 1000),
+      comments: s.descendants ? `${s.descendants} comments` : "",
+      dead: false,
+      upvoted: true,
+    }
+  })
+  const moreLink = ""
   return (
     <div>
       {storyList.map((story, i) => (

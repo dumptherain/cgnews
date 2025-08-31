@@ -9,6 +9,7 @@ export default clerkMiddleware({
 		"/ask",
 		"/show",
 		"/job",
+		"/api/submit",
 		"/item/(.*)",
 		"/search",
 		"/api/(.*)",

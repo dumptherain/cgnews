@@ -3,9 +3,9 @@ import { notFound, redirect } from "next/navigation"
 import { CakeSlice } from "lucide-react"
 
 import { profileTabs } from "@/config/conf"
-import { fetchUser } from "@/lib/hn-api-fetcher"
+import { prisma } from "@/lib/db"
 import { HnUser } from "@/lib/hn-types"
-import { getCurrentUserId } from "@/lib/session"
+import { currentUser } from "@clerk/nextjs/server"
 import { formatDate } from "@/lib/time-utils"
 import { Separator } from "@/components/ui/separator"
 
@@ -38,11 +38,23 @@ export async function generateMetadata(
 }
 
 export default async function TabPage({ params, searchParams }: Props) {
-  const user = await fetchUser(searchParams.id)
-  if (!user) {
+  const target = searchParams.id
+  const local = await prisma.user.findFirst({
+    where: { OR: [{ username: target }, { clerkId: target }] },
+    include: { profile: true },
+  })
+  if (!local) {
     notFound()
   }
-  const myUserId = getCurrentUserId()
+  const user: HnUser = {
+    id: local.username || local.clerkId,
+    about: local.profile?.about || "",
+    created: Math.floor(new Date(local.createdAt).getTime() / 1000),
+    karma: local.profile?.karma || 0,
+    submitted: [],
+  }
+  const cu = await currentUser()
+  const myUserId = cu?.username || cu?.id
   const myself = myUserId === user.id
   const myselfTab = profileTabs
     .filter((item) => item.public === false)

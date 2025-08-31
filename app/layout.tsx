@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     "React",
     "Tailwind CSS",
     "Server Components",
-    "Hacker News",
+    "CGNews",
   ],
   authors: siteConf.authors,
   creator: siteConf.authors[0].name,

@@ -1,9 +1,9 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { currentUser } from "@clerk/nextjs/server"
 
-import { fetchItem } from "@/lib/hn-api-fetcher"
+import { getStory, listStoryComments } from "@/lib/data"
 import { commentCount, replyableStroy } from "@/lib/hn-item-utils"
-import { isLogin } from "@/lib/session"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 import Fave from "@/components/fave"
@@ -26,10 +26,11 @@ export default async function ItemWithComment({
   if (!id) {
     notFound()
   }
-  const story = await fetchItem(id)
+  const story = await getStory(id)
   if (!story) {
     notFound()
   }
+  const clerkUser = await currentUser()
   return (
     <div className="flex flex-col justify-start space-y-3">
       <div>
@@ -53,13 +54,14 @@ export default async function ItemWithComment({
         <HtmlText innerHtml={story.text} />
       </div>
       {replyableStroy(story) && (
-        <ReplyForm parentId={story?.id} logined={isLogin()} />
+        <ReplyForm parentId={story?.id} logined={!!clerkUser} />
       )}
       <Separator orientation="horizontal" className="my-2" />
       {story.descendants > 0 && (
         <span className="font-semibold">{commentCount(story.descendants)}</span>
       )}
-      {story?.kids && <Comments ids={story.kids} story={story} />}
+      {/* Simple flat comments from our DB for now */}
+      <Comments ids={[]} story={story} />
     </div>
   )
 }

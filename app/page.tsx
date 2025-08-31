@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic"
 import { HnStoryType } from "@/lib/hn-types"
 import TypePage from "@/app/[type]/components/type-page"
 

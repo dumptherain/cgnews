@@ -1,5 +1,5 @@
-# Next.js HackerNews
-This is a [HackerNews](https://news.ycombinator.com/) clone built with [Next.js](https://nextjs.org/) and [shadcn/ui](https://ui.shadcn.com/).
+# CGNews (Next.js)
+This is CGNews built with [Next.js](https://nextjs.org/) and [shadcn/ui](https://ui.shadcn.com/).
 
 ![index](./screenshots/desktop/index.png)
 
@@ -14,7 +14,7 @@ This is a [HackerNews](https://news.ycombinator.com/) clone built with [Next.js]
 - Styling with Tailwind CSS
 - Browse stories: Top, Newest, Best, Show, Ask, Jobs.
 - Search for stories.
-- User authentication: Create an account or log in using your Hacker News account to access personalized features.
+- User authentication: Create an account and log in with Clerk to access personalized features.
 - Mark stories as favorite.
 - Upvote stories or comments.
 - Add comments.
@@ -126,18 +126,7 @@ pnpm start
 
 ## APIs
 This project leverages the power of various APIs to provide an enriched user experience:
-- [HackerNews Official API](https://github.com/HackerNews/API)
-  - Get stories
-  - Get comments
-  - Get user profiles
-- [HackerNews Website](https://news.ycombinator.com)
-  - Login/create account
-  - Add comments
-  - Upvote
-  - Favorite
-  - Submitted, Comments, Favorites, Upvoted(private)
-- [HnAlgolia API](https://hn.algolia.com/api)
-  - Search
+This project originally used HN APIs; CGNews now uses Neon (Postgres) + Prisma for data and Clerk for auth.
 
 
 ## License

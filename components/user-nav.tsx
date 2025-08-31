@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -9,7 +11,7 @@ import {
   UserRound,
 } from "lucide-react"
 
-import { logoutAction } from "@/lib/actions"
+import { SignOutButton } from "@clerk/nextjs"
 import { HnUser } from "@/lib/hn-types"
 import { formatDate } from "@/lib/time-utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -76,14 +78,13 @@ export function UserNav({ user }: { user: HnUser }) {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <form action={logoutAction}>
-            <input name="goto" hidden defaultValue={usePathname()} />
-            <button type="submit" className="hover:cursor-default">
+        <DropdownMenuItem asChild>
+          <SignOutButton redirectUrl="/">
+            <button type="button" className="hover:cursor-default">
               <LogOut size={14} className="mr-2 inline" />
               Log out
             </button>
-          </form>
+          </SignOutButton>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

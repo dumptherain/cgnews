@@ -41,30 +41,7 @@ export function Header({ user }: { user: HnUser | null }) {
         </div>
         <div className="flex flex-1 items-center justify-end">
           <SearchInput />
-          {storyNavVisiable && (
-            <Button variant={"ghost"} className="hidden size-8">
-              <Link rel="noreferrer nofollow" href={"/submit"}>
-                <Plus size={22}></Plus>
-              </Link>
-            </Button>
-          )}
-          <Link
-            href={siteConf.links.github}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <div
-              className={cn(
-                buttonVariants({
-                  variant: "ghost",
-                }),
-                "size-8 px-0"
-              )}
-            >
-              <Icons.GitHub className="size-5" />
-              <span className="sr-only">GitHub</span>
-            </div>
-          </Link>
+          {/* Submit button will be rendered in DesktopNav next to Jobs */}
           <ModeToggle />
           {user && <UserNav user={user} />}
           {storyNavVisiable && !user && (

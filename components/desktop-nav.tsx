@@ -1,10 +1,13 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { storyNavConfig } from "@/config/conf"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
+import { buttonVariants } from "@/components/ui/button"
+import { Plus } from "lucide-react"
+// 
 
 interface DesktopNavProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -32,6 +35,9 @@ export function DesktopNav({ className, ...props }: DesktopNavProps) {
             </Link>
           )
         })}
+        <Link href="/submit" prefetch={false} className={cn(buttonVariants({ variant: "default" }), "ml-2 h-8 px-2 hidden md:flex")}> 
+          <Plus size={16} className="mr-1" /> Submit
+        </Link>
       </nav>
     </div>
   )

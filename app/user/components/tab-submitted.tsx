@@ -1,7 +1,10 @@
+export const dynamic = "force-dynamic"
 import { Suspense } from "react"
 import Link from "next/link"
 
-import { getSubmitted } from "@/lib/hn-web-fetcher"
+import { prisma } from "@/lib/db"
+import { HnWebStory } from "@/lib/hn-web-types"
+import { points, site, ago } from "@/lib/hn-item-utils"
 import ItemSkeleton from "@/components/item-skeleton"
 import Story from "@/components/story"
 
@@ -33,7 +36,34 @@ async function Submitted({
   next: number
   n: number
 }) {
-  const { storyList, moreLink } = await getSubmitted(userId, next, n)
+  const pageSize = 10
+  const skip = Number(next) || 0
+  // Resolve the actual Prisma user first using either username or Clerk ID
+  const user = await prisma.user.findFirst({
+    where: { OR: [{ username: userId }, { clerkId: userId }] },
+  })
+  const stories = user
+    ? await prisma.story.findMany({
+        where: { authorId: user.id },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      })
+    : []
+  const storyList: HnWebStory[] = stories.map((s) => ({
+    id: s.id,
+    title: s.title,
+    url: s.url || "",
+    sitestr: site(s.url || undefined) || "",
+    score: points(s.score) || "0 points",
+    by: user?.username || userId,
+    age: ago(Math.floor(new Date(s.createdAt).getTime() / 1000)) || "",
+    time: Math.floor(new Date(s.createdAt).getTime() / 1000),
+    comments: s.descendants ? `${s.descendants} comments` : "",
+    dead: false,
+  }))
+  const nextOffset = stories.length < pageSize ? undefined : skip + pageSize
+  const moreLink = nextOffset !== undefined ? `next=${nextOffset}` : ""
   return (
     <div>
       {storyList.map((story, i) => (

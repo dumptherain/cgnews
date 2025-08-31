@@ -4,13 +4,25 @@ import { inTwoWeeks, timeAgo } from "./time-utils"
 
 export const site = (url?: string) => {
   if (!url) {
-    return url
+    return ""
   }
-  let { host, pathname } = url ? new URL(url) : { host: "#", pathname: "" }
-  if (host === "github.com" && pathname.includes("/")) {
-    host += pathname.substring(0, pathname.indexOf("/", 1))
+  
+  try {
+    // Check if the URL is valid before constructing it
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return ""
+    }
+    
+    let { host, pathname } = new URL(url)
+    if (host === "github.com" && pathname.includes("/")) {
+      host += pathname.substring(0, pathname.indexOf("/", 1))
+    }
+    return host.replace(/^www\./, "")
+  } catch (error) {
+    // If URL construction fails, return empty string
+    console.warn(`Invalid URL: ${url}`, error)
+    return ""
   }
-  return host.replace(/^www\./, "")
 }
 
 export const points = (score?: number) => {

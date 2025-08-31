@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 
 import {
@@ -16,7 +18,7 @@ export interface Props {
   moreLink?: string
 }
 
-export default async function ItemList({
+export default function ItemList({
   stories,
   offset = 1,
   moreLink,

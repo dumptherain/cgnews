@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic"
 import { HnStoryType } from "@/lib/hn-types"
 import ItemList from "@/components/item-list"
 import { listStories } from "@/lib/data"
@@ -15,7 +16,13 @@ export default async function TypeStories({
 }) {
   const limit = pageSize || 30
   const offset = (page - 1) * limit
-  const stories = await listStories({ storyType, page, pageSize: limit, order: "hot" })
+  const order =
+    storyType === HnStoryType.newstories
+      ? "new"
+      : storyType === HnStoryType.beststories
+      ? "top"
+      : "hot"
+  const stories = await listStories({ storyType, page, pageSize: limit, order })
 
   const searchParams = new URLSearchParams()
   searchParams.set("page", (+page + 1).toString())
