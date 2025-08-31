@@ -2,10 +2,8 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-
-import { fave, login, logout, reply, vote } from "./hn-web-fetcher"
-import { VoteStatus } from "./hn-web-types"
-import { createSession, destorySession, getAcct } from "./session"
+import { auth } from "@clerk/nextjs/server"
+import { prisma } from "@/lib/db"
 
 const goto = (path: string | FormData) => {
   let target: string = "/"
@@ -18,82 +16,22 @@ const goto = (path: string | FormData) => {
   redirect(target)
 }
 
-export async function loginAction({
-  acct,
-  pw,
-  goto: path,
-  creating,
-}: {
-  acct: string
-  pw: string
-  goto: string
-  creating?: string
-}) {
-  try {
-    const { success, message, userCookie } = await login({
-      acct,
-      pw,
-      creating,
+export const faveAction = async (storyId: number, faved: boolean) => {
+  const { userId: clerkId } = auth()
+  if (!clerkId) return { success: false, message: "Not Login" }
+  const user = await prisma.user.findUnique({ where: { clerkId } })
+  if (!user) return { success: false, message: "User not found" }
+  if (faved) {
+    await prisma.favorite.upsert({
+      where: { userId_storyId: { userId: user.id, storyId } },
+      update: {},
+      create: { userId: user.id, storyId },
     })
-    if (!success) {
-      return {
-        success: false,
-        message: `Error: ${message}`,
-      }
-    }
-    if (userCookie) {
-      await createSession(userCookie, acct, pw)
-    } else {
-      return {
-        success: false,
-        message: `Error: Failed to Get Cookie.`,
-      }
-    }
-  } catch (error) {
-    console.error("🚀 ~ error:", error)
-    return {
-      success: false,
-      message: "Error: Failed to Login.",
-    }
-  }
-  goto(path)
-}
-
-export const logoutAction = async (formData: FormData) => {
-  try {
-    logout()
-  } catch (error) {
-    console.warn("🚀 ~ logoutAction ~ error:", error)
-  }
-  destorySession()
-  goto(formData)
-}
-
-export const faveAction = async (id: number, faved: boolean) => {
-  const acctPw = getAcct()
-  if (acctPw && acctPw.acct && acctPw.pw) {
-    try {
-      fave({
-        ...acctPw,
-        id,
-        fave: faved,
-      })
-    } catch (error) {
-      return {
-        status: -1,
-        message: "Error: Failed to fave.",
-      }
-    }
-    revalidatePath("/user/favorites")
-    return {
-      success: true,
-    }
   } else {
-    return {
-      success: false,
-      message: "Not Login",
-    }
+    await prisma.favorite.delete({ where: { userId_storyId: { userId: user.id, storyId } } }).catch(() => null)
   }
+  revalidatePath("/user/favorites")
+  return { success: true }
 }
 
 export const replyAction = async ({
@@ -103,48 +41,32 @@ export const replyAction = async ({
   parent: number
   text: string
 }) => {
-  const acctPw = getAcct()
-  if (acctPw && acctPw.acct && acctPw.pw) {
-    try {
-      reply({
-        ...acctPw,
-        parent,
-        text,
-      })
-    } catch (error) {
-      return {
-        success: false,
-        message: "Error: Failed to reply.",
-      }
-    }
-  } else {
-    goto("/login")
-  }
+  const { userId: clerkId } = auth()
+  if (!clerkId) return { success: false, message: "Not Login" }
+  const user = await prisma.user.findUnique({ where: { clerkId } })
+  if (!user) return { success: false, message: "User not found" }
+  // parent is story id or comment id; assume story for now
+  await prisma.comment.create({ data: { storyId: parent, authorId: user.id, text } })
+  return { success: true }
 }
 
-export const voteAction = async (id: number, how: VoteStatus) => {
-  const acctPw = getAcct()
-  if (acctPw && acctPw.acct && acctPw.pw) {
-    try {
-      vote({
-        ...acctPw,
-        id,
-        how,
-      })
-    } catch (error) {
-      return {
-        status: -1,
-        message: "Error: Failed to upvote.",
-      }
-    }
-    revalidatePath("/user/upvoted")
-    return {
-      success: true,
-    }
+export type VoteStatus = "up" | "un"
+export const voteAction = async (storyId: number, how: VoteStatus) => {
+  const { userId: clerkId } = auth()
+  if (!clerkId) return { success: false, message: "Not Login" }
+  const user = await prisma.user.findUnique({ where: { clerkId } })
+  if (!user) return { success: false, message: "User not found" }
+  if (how === "up") {
+    await prisma.vote.upsert({
+      where: { userId_storyId: { userId: user.id, storyId } },
+      update: {},
+      create: { userId: user.id, storyId },
+    })
+    await prisma.story.update({ where: { id: storyId }, data: { score: { increment: 1 } } })
   } else {
-    return {
-      success: false,
-      message: "Not Login",
-    }
+    await prisma.vote.delete({ where: { userId_storyId: { userId: user.id, storyId } } }).catch(() => null)
+    await prisma.story.update({ where: { id: storyId }, data: { score: { decrement: 1 } } })
   }
+  revalidatePath("/user/upvoted")
+  return { success: true }
 }

@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 
-import { fetchUser } from "@/lib/hn-api-fetcher"
-import { getCurrentUserId } from "@/lib/session"
+import { currentUser } from "@clerk/nextjs/server"
+import { ClerkProvider } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/sonner"
 import Footer from "@/components/footer"
@@ -39,35 +39,45 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const userId = getCurrentUserId()
-  const user = userId ? await fetchUser(userId) : null
+  const clerkUser = await currentUser()
+  const user = clerkUser
+    ? {
+        id: clerkUser.username || clerkUser.id,
+        about: "",
+        created: Math.floor(new Date(clerkUser.createdAt!).getTime() / 1000),
+        karma: 0,
+        submitted: [],
+      }
+    : null
 
   return (
-    <html lang="en">
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
-        )}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={cn(
+            "min-h-screen bg-background font-sans antialiased",
+            fontSans.variable
+          )}
         >
-          <CurrentUserProvider currentUser={user}>
-            <div className="relative flex min-h-screen flex-col items-center bg-background">
-              <Header user={user} />
-              <main className="container flex flex-1 flex-col py-3 md:w-1/2">
-                {children}
-              </main>
-              <Footer />
-            </div>
-            <Toaster />
-          </CurrentUserProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <CurrentUserProvider currentUser={user}>
+              <div className="relative flex min-h-screen flex-col items-center bg-background">
+                <Header user={user} />
+                <main className="container flex flex-1 flex-col py-3 md:w-1/2">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+              <Toaster />
+            </CurrentUserProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

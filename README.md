@@ -97,18 +97,29 @@ pnpm install
 ```bash
 cp .env.example .env.local
 ```
-3. Run the development server with hot reload.
+3. Configure environment variables (Neon + Clerk) in `.env.local`:
+```
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB?sslmode=require"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_xxx"
+CLERK_SECRET_KEY="sk_test_xxx"
+```
+4. Initialize Prisma schema locally (if using Neon, ensure DATABASE_URL is set):
+```bash
+pnpm prisma migrate dev --name init
+pnpm prisma generate
+```
+5. Run the development server with hot reload.
 ```bash
 pnpm dev
 ```
-4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+6. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-5. Build for production
+7. Build for production
 ```bash
 pnpm run build
 ```
 
-6. Serve in production mode
+8. Serve in production mode
 ```bash
 pnpm start
 ```

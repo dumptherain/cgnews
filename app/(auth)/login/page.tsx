@@ -1,6 +1,5 @@
 import { Metadata } from "next"
-
-import AuthPage from "../components/auth-page"
+import { SignIn } from "@clerk/nextjs"
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -13,5 +12,5 @@ export default function Page({
 }: {
   searchParams: { goto?: string }
 }) {
-  return <AuthPage page={"login"} searchParams={searchParams} />
+  return <SignIn routing="hash" />
 }
