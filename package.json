@@ -19,7 +19,8 @@
     "typecheck": "tsc --noEmit",
     "format:write": "prettier --write \"**/*.{js,ts,jsx,tsx,mdx}\" --cache",
     "format:check": "prettier --check \"**/*.{js,ts,jsx,tsx,mdx}\" --cache",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.6",
