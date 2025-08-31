@@ -35,7 +35,7 @@ export function DesktopNav({ className, ...props }: DesktopNavProps) {
             </Link>
           )
         })}
-        <Link href="/submit" prefetch={false} className={cn(buttonVariants({ variant: "default" }), "ml-2 h-8 px-2 hidden md:flex")}> 
+        <Link href="/submit" prefetch={false} className={cn(buttonVariants({ variant: "default" }), "hidden h-8 px-2 ml-2 md:flex")}> 
           <Plus size={16} className="mr-1" /> Submit
         </Link>
       </nav>

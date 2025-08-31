@@ -41,7 +41,7 @@ export default async function Comments({
                 <form action={deleteCommentAction} className="ml-2">
                   <input type="hidden" name="commentId" value={c.id} />
                   <input type="hidden" name="storyId" value={story.id} />
-                  <button type="submit" className="text-xs underline text-muted-foreground">delete</button>
+                  <button type="submit" className="text-xs text-muted-foreground underline">delete</button>
                 </form>
               )}
             </div>
