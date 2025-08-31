@@ -25,16 +25,19 @@ export const site = (url?: string) => {
   }
 }
 
-export const points = (score?: number) => {
-  if (!score) {
-    return score
+export const points = (score?: number): string => {
+  if (score == null || Number.isNaN(score)) {
+    return ""
+  }
+  if (score <= 0) {
+    return "0 points"
   }
   return `${score} ${plural(score, "point")}`
 }
 
-export const ago = (time?: number) => {
-  if (!time) {
-    return time
+export const ago = (time?: number): string => {
+  if (time == null || Number.isNaN(time)) {
+    return ""
   }
   return `${timeAgo(time)} ago`
 }
