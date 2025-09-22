@@ -24,14 +24,25 @@ export default function SearchInput() {
     }
   }
   return (
-    <div className="relative mx-1 flex-1 md:flex-initial">
-      <SearchIcon className="absolute left-2 top-1/2 size-3 -translate-y-1/2" />
+    <form onSubmit={(e) => {
+      e.preventDefault()
+      const val = (e.target as HTMLFormElement).querySelector('input')?.value
+      if (val) {
+        const target = `/search?query=${val}`
+        if (pathname === "/search") {
+          replace(target)
+        } else {
+          push(target)
+        }
+      }
+    }} className="relative">
+      <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         placeholder="Search..."
-        className="h-9 pl-8"
+        className="h-8 w-40 pl-10 pr-3 text-sm transition-all duration-200 bg-card/60 border border-border/70 rounded-sm focus:w-56 focus:ring-1 focus:ring-ring focus:border-border/50"
         defaultValue={searchParams.get("query")?.toString()}
-        onKeyUp={handleKeyUp}
+        name="query"
       />
-    </div>
+    </form>
   )
 }

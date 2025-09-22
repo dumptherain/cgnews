@@ -25,13 +25,8 @@ export default function ItemList({
 }: Props) {
   return (
     <>
-      {stories.map((story, i) => (
-        <div key={story.id} className="flex space-x-2">
-          {null != offset ? (
-            <span className="min-w-7 pt-2 text-center text-muted-foreground">
-              {i + offset + 1}.
-            </span>
-          ) : null}
+      <div className="space-y-2">
+        {stories.map((story, i) => (
           <Story
             key={story.id}
             data={hnItem2HnWebStory(story)}
@@ -40,9 +35,8 @@ export default function ItemList({
             hideCommentCount={hideCommentCount(story.type)}
             hideUsername={hideUsername(story.type)}
           />
-          {/* <Story key={story.id} data={story} /> */}
-        </div>
-      ))}
+        ))}
+      </div>
       <div className="pt-3">
         {moreLink && (
           <Link

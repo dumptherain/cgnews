@@ -16,27 +16,34 @@ export function DesktopNav({ className, ...props }: DesktopNavProps) {
 
   return (
     <div className={className} {...props}>
-      <nav className="flex items-center space-x-6 text-sm font-medium">
-        {storyNavConfig.map((navItem, index) => {
+      <nav className="flex items-center gap-1 text-xs">
+        <Link
+          href="/"
+          prefetch={false}
+          className={cn(
+            "px-2.5 py-1 rounded-sm text-foreground/70 hover:text-accent-foreground tab-underline",
+            pathname === "/" ? "text-foreground tab-underline-active" : ""
+          )}
+        >
+          Top
+        </Link>
+        {storyNavConfig.slice(1, 6).map((navItem, index) => {
           return (
             <Link
               key={navItem.name}
               href={navItem.link}
               prefetch={false}
               className={cn(
-                "transition-colors hover:text-foreground/80 ",
-                pathname === navItem.link ||
-                  (pathname === "/" && navItem.name === "Top")
-                  ? "text-foreground"
-                  : "text-foreground/50"
+                "px-2.5 py-1 rounded-sm text-foreground/70 hover:text-accent-foreground tab-underline",
+                pathname === navItem.link ? "text-foreground tab-underline-active" : ""
               )}
             >
               {navItem.name}
             </Link>
           )
         })}
-        <Link href="/submit" prefetch={false} className={cn(buttonVariants({ variant: "default" }), "ml-2 hidden h-8 px-2 md:flex")}> 
-          <Plus size={16} className="mr-1" /> Submit
+        <Link href="/submit" prefetch={false} className={cn(buttonVariants({ variant: "soft" }), "ml-2 h-8 px-3 text-xs rounded-sm shadow-[0_0_0_1px_hsl(var(--foreground)/0.02)]") }>
+          <Plus size={14} className="mr-1" /> Submit
         </Link>
       </nav>
     </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, JetBrains_Mono } from "next/font/google"
 
 import { currentUser } from "@clerk/nextjs/server"
 import { ClerkProvider } from "@clerk/nextjs"
@@ -15,6 +15,7 @@ import { siteConf } from "@/config/conf"
 import { CurrentUserProvider } from "@/hooks/currentUserContext"
 
 const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" })
+const fontMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export const metadata: Metadata = {
   title: {
@@ -55,8 +56,9 @@ export default async function RootLayout({
       <html lang="en">
         <body
           className={cn(
-            "min-h-screen bg-background font-sans antialiased",
-            fontSans.variable
+            "min-h-screen bg-background font-mono antialiased",
+            fontSans.variable,
+            fontMono.variable
           )}
         >
           <ThemeProvider
@@ -68,9 +70,15 @@ export default async function RootLayout({
             <CurrentUserProvider currentUser={user}>
               <div className="relative flex min-h-screen flex-col items-center bg-background">
                 <Header user={user} />
-                <main className="container flex flex-1 flex-col py-3 md:w-1/2">
-                  {children}
-                </main>
+                <div className="w-full flex-1 flex">
+                  <div className="container max-w-5xl flex-1 flex">
+                    <div className="rounded-b-md rounded-t-none border border-t-0 border-border/60 bg-card shadow-[0_0_0_1px_hsl(var(--foreground)/0.02)] w-full -mt-2 mb-4 sm:mb-6">
+                      <main className="flex flex-1 flex-col pt-6 sm:pt-7 pb-3 px-2 sm:px-4">
+                        {children}
+                      </main>
+                    </div>
+                  </div>
+                </div>
                 <Footer />
               </div>
               <Toaster />
